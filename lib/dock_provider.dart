@@ -96,37 +96,49 @@ class DockProvider extends ChangeNotifier {
 
   /// Updates the size and padding of icons based on their hover status.
   Map<String, dynamic> updateIconSize({required int currentIndex}) {
-    int baseIconSize = 40;
-    int updatedIconSize = baseIconSize;
-    double extraPadding = 0;
+    double initialIconSize = 40;
+    double bottomPadding = 0;
+    double updatedIconSize = initialIconSize;
+    double zoomIconSize = 10;
 
     if (currentHoveredItemIndex != -1) {
-      int gap = (currentIndex - currentHoveredItemIndex).abs();
+      int distance = (currentIndex - currentHoveredItemIndex).abs();
 
-      if (gap == 0) {
-        updatedIconSize = 70;
-        extraPadding = 10;
-      } else if (gap == 1) {
-        updatedIconSize = 60;
-        extraPadding = 5;
+      // Manage icon size and padding based on hover index
+      if (distance == 0) {
+        updatedIconSize = (initialIconSize - 10) + zoomIconSize * 4;
+        bottomPadding = 10;
+      } else if (distance == 1) {
+        updatedIconSize = (initialIconSize - 10) + zoomIconSize * 3;
+        bottomPadding = 5;
 
-        // Adjust size based on hover position for smoother animation.
-        if (hoverIconPositionX >= 0 && hoverIconPositionX <= 30) {
-          updatedIconSize += ((40 - hoverIconPositionX) * 10 / 40).round();
-          extraPadding = 10;
-        } else if (hoverIconPositionX >= 50 && hoverIconPositionX <= 80) {
-          updatedIconSize -= ((40 - hoverIconPositionX) * 10 / 40).round();
-          extraPadding = 10;
+        // Additional size adjustment based on hover
+        if ((currentHoveredItemIndex >= 0 && currentHoveredItemIndex <= 30) &&
+            (currentIndex - currentHoveredItemIndex).isNegative) {
+          int size =
+              ((initialIconSize - hoverIconPositionX) * (10 / initialIconSize))
+                  .round();
+          updatedIconSize = (initialIconSize - 10) + (zoomIconSize * 3) + size;
+          bottomPadding = 10;
+        } else if ((hoverIconPositionX >= 51 && hoverIconPositionX <= 80) &&
+            !(currentIndex - currentHoveredItemIndex).isNegative) {
+          int size =
+              ((initialIconSize - hoverIconPositionX) * (10 / initialIconSize))
+                  .round();
+          updatedIconSize = (initialIconSize - 10) + (zoomIconSize * 3) - size;
+          bottomPadding = 10;
         }
-      } else if (gap == 2) {
-        updatedIconSize = 50;
+      } else if (distance == 2) {
+        updatedIconSize = (initialIconSize - 10) + zoomIconSize * 2;
+      } else if (distance == 3) {
+        updatedIconSize = (initialIconSize - 10) + zoomIconSize;
       }
     }
 
     return {
       'updatedIconSize': updatedIconSize.toDouble(),
-      'paddingFromBottom': extraPadding,
-      'baseIconSize': baseIconSize.toDouble(),
+      'paddingFromBottom': bottomPadding.toDouble(),
+      'baseIconSize': initialIconSize.toDouble(),
     };
   }
 
